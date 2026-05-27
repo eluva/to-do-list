@@ -17,8 +17,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/folders', folderRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Serve static frontend in production
-app.use(express.static('../frontend'));
+const path = require('path');
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
