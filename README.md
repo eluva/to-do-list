@@ -3,7 +3,10 @@
 
 <h2 align= "center"> <img src="frontend/favicon.svg" width="24" height="24" style="vertical-align: bottom;"> Full-featured task management web application with folder support, drag-and-drop ordering, customizable folder colors, multi-language interface, and Google authentication.</h2>
 
-## Features
+<h2>
+  Features 
+  <img src="kitten.gif" alt="icon" width="64" style="vertical-align: middle; margin-left: 8px;">
+</h2>
 
 - **Authentication** — email/password registration and login; Google Sign-In via Firebase.
 - **Folders** — create, rename, delete folders; assign one of 14 border colors.
