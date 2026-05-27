@@ -3,9 +3,9 @@
 
 <h2 align= "center"> <img src="frontend/favicon.svg" width="24" height="24" style="vertical-align: bottom;"> Full-featured task management web application with folder support, drag-and-drop ordering, customizable folder colors, multi-language interface, and Google authentication.</h2>
 
-<h2>
-  Features 
-  <img src="kitten.gif" alt="icon" width="64" style="vertical-align: middle; margin-left: 8px;">
+<h2 style="display: flex; align-items: center;">
+  <img src="kitten.gif" width="32" height="32" style="vertical-align: middle; margin-right: 10px;">
+  <span style="line-height: 32px;">Features</span>
 </h2>
 
 - **Authentication** — email/password registration and login; Google Sign-In via Firebase.
