@@ -29,7 +29,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const firebaseAuth = firebase.auth();
 
-const API_BASE = 'http://localhost:5000/api';   // изменить при деплое
+const API_BASE = 'https://to-do-list-urp2.onrender.com/api';   // изменить при деплое
 
 // Глобальное состояние
 let token = localStorage.getItem('token');
