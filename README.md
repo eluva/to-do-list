@@ -20,8 +20,6 @@
 
 ## Live Demo
 
-The application is deployed and accessible at:
-**Deployed version:** [your-deployed-url.com](https://your-deployed-url.com)
 
 ## Preview
 
