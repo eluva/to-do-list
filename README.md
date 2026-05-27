@@ -1,4 +1,4 @@
-<h1 align="center">To-Do Application</h1>
+<h1 align="left">To-Do Application</h1>
 
 
 <h2 align= "center"> <img src="frontend/favicon.svg" width="24" height="24" style="vertical-align: bottom;"> Full-featured task management web application with folder support, drag-and-drop ordering, customizable folder colors, multi-language interface, and Google authentication.</h2>
