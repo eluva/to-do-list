@@ -1,0 +1,921 @@
+/* ===========================================================
+   TO‑DO APP 
+   Структура:
+     1. Переменные (светлая/тёмная тема)
+     2. Базовые сбросы и layout
+     3. Заголовок и панель управления
+     4. Кнопки, поля ввода, селекты
+     5. Аутентификация
+     6. Папки (список, бейджи, кнопки действий)
+     7. Задачи (список, элементы, чекбокс)
+     8. Разное (разделители, скроллбар, плейсхолдеры, утилиты)
+     9. Переключатель темы
+    10. Инлайн-поле создания папки
+    11. Выпадающий список языков
+    12. Модальные окна
+    13. Цветовая палитра в модалке
+    14. Индикатор загрузки
+    15. Анимации (задачи, папки, удаление)
+    16. Drag & Drop (Sortable)
+    17. Адаптивная вёрстка
+   =========================================================== */
+
+/* ===== 1. ПЕРЕМЕННЫЕ ===== */
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --text-secondary: #6c757d;
+  --border: #dee2e6;
+  --primary: #1a1a1a;
+  --primary-hover: #000000;
+  --primary-text: #ffffff;
+  --danger: #495057;
+  --danger-hover: #212529;
+  --danger-text: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.05);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --transition-micro: 0.1s ease;
+  --transition-fast: 0.15s ease;
+  --transition-theme: 0.3s ease;
+}
+
+body.dark {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #f0f0f0;
+  --text-secondary: #9e9e9e;
+  --border: #333333;
+  --primary: #f0f0f0;
+  --primary-hover: #ffffff;
+  --primary-text: #121212;
+  --danger: #6c757d;
+  --danger-hover: #495057;
+  --danger-text: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.4);
+}
+
+/* ===== 2. БАЗОВЫЕ СБРОСЫ И LAYOUT ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--transition-theme), color var(--transition-theme);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 100%;
+  background: var(--surface);
+  box-shadow: none;
+  border-radius: 0;
+  border: none;
+  padding: 2rem 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  transition: background var(--transition-theme);
+}
+
+#appBlock {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ===== 3. ЗАГОЛОВОК И ПАНЕЛЬ УПРАВЛЕНИЯ ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  transition: color var(--transition-theme);
+}
+
+.controls {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===== 4. КНОПКИ, ПОЛЯ ВВОДА, СЕЛЕКТЫ ===== */
+button,
+select,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  font-family: inherit;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1rem;
+  background: var(--surface);
+  color: var(--text);
+  transition: background var(--transition-micro), color var(--transition-micro),
+              border-color var(--transition-micro), transform var(--transition-micro),
+              box-shadow var(--transition-micro);
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+button {
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  background: var(--primary);
+  color: var(--primary-text);
+  border: none;
+  transform: translateY(0);
+}
+
+button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+button.danger {
+  background: var(--danger);
+  color: var(--danger-text);
+}
+
+button.danger:hover {
+  background: var(--danger-hover);
+}
+
+select {
+  cursor: pointer;
+}
+
+/* ===== 5. АУТЕНТИФИКАЦИЯ ===== */
+.auth-section {
+  margin: 2rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+/* Кнопка "Sign in with Google" */
+.google-btn {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.google-btn::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%234285F4' d='M24 9.5c3.9 0 6.6 1.6 8.1 2.9l6-6C34.7 3.5 29.9 1.5 24 1.5 14.6 1.5 6.7 7.9 3.2 17l7.3 5.7C12.1 15.6 17.6 9.5 24 9.5z'/%3E%3Cpath fill='%2334A853' d='M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 2.9-2.2 5.3-4.6 6.9l7.3 5.7c4.3-4 6.8-9.9 6.8-16.9z'/%3E%3Cpath fill='%23FBBC04' d='M10.5 28.7c-1.1-3.1-1.1-6.4 0-9.5l-7.3-5.7c-2.8 5.6-2.8 12.4 0 18l7.3-5.7z'/%3E%3Cpath fill='%23EA4335' d='M24 46.5c6.5 0 11.9-2.1 15.9-5.8l-7.3-5.7c-2 1.4-4.6 2.2-7.6 2.2-6.1 0-11.3-4.1-13.2-9.7l-7.3 5.7c3.5 8.9 11.4 15.3 20.9 15.3z'/%3E%3C/svg%3E");
+  background-size: contain;
+  filter: none;
+}
+
+/* ===== 6. ПАПКИ ===== */
+.folders-section {
+  flex-shrink: 0;
+  margin-bottom: 1.5rem;
+}
+
+.folder-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.folder-badge {
+  padding: 0.5rem 1.1rem;
+  border-radius: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.folder-badge.active {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
+.folder-badge:hover:not(.active) {
+  background: var(--bg);
+  border-color: var(--text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Кнопка создания папки */
+.add-folder-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 1.2rem;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.2s ease;
+  flex-shrink: 0;
+  filter: grayscale(1);
+}
+
+.add-folder-btn:hover {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+  transform: rotate(90deg) scale(1.05);
+}
+
+/* Кнопки действий внутри папки (всегда видны) */
+.folder-actions.always-visible {
+  display: flex;
+  gap: 0.2rem;
+  margin-left: 0.4rem;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.folder-badge:hover .folder-actions.always-visible {
+  opacity: 1;
+}
+
+.folder-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast);
+  filter: grayscale(1);
+  transform: scale(0.9);
+}
+
+.folder-action-btn:hover {
+  background: var(--border);
+  transform: scale(1.1);
+}
+
+.folder-action-btn.delete:hover {
+  background: var(--danger);
+  color: var(--danger-text);
+}
+
+/* Активная папка: иконки действий */
+.folder-badge.active .folder-action-btn {
+  color: var(--primary-text);
+}
+
+.folder-badge.active .folder-action-btn:hover {
+  background: rgba(128,128,128,0.25);
+}
+
+.folder-badge.active .folder-action-btn.delete:hover {
+  background: rgba(255,255,255,0.3);
+  color: var(--danger-text);
+}
+
+/* ===== 7. ЗАДАЧИ ===== */
+.tasks-section {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#taskList {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+  min-height: 0;
+}
+
+.task-form {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.task-form input {
+  flex: 1;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition-micro);
+}
+
+.task-item:hover {
+  background: var(--bg);
+}
+
+.task-item:last-child {
+  border-bottom: none;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.task-text {
+  flex: 1;
+  word-break: break-word;
+  font-size: 1rem;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.task-actions button {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+}
+
+/* Кастомный чекбокс */
+input[type="checkbox"] {
+  appearance: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  background: var(--surface);
+  transition: background var(--transition-micro),
+              border-color var(--transition-micro);
+  flex-shrink: 0;
+}
+
+input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+input[type="checkbox"]::after {
+  content: "✓";
+  color: var(--primary-text);
+  font-size: 0.9rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform var(--transition-micro);
+}
+
+input[type="checkbox"]:checked::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ===== 8. РАЗДЕЛИТЕЛИ, СКРОЛЛБАР, ПЛЕЙСХОЛДЕРЫ, УТИЛИТЫ ===== */
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+  flex-shrink: 0;
+}
+
+::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.hidden {
+  display: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* ===== 9. ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ===== */
+.theme-toggle-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 1.2rem;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-micro),
+              transform var(--transition-micro);
+  filter: grayscale(1);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transform: scale(1.1);
+}
+
+/* ===== 10. ИНЛАЙН-ПОЛЕ СОЗДАНИЯ ПАПКИ ===== */
+.folder-input-inline {
+  padding: 0.4rem 0.9rem;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  outline: none;
+  width: 150px;
+  transition: border-color var(--transition-micro);
+  box-shadow: var(--shadow-sm);
+}
+
+.folder-input-inline:focus {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* ===== 11. ВЫПАДАЮЩИЙ СПИСОК ЯЗЫКОВ ===== */
+.lang-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.lang-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.lang-dropdown-btn:hover {
+  background: var(--bg);
+  border-color: var(--text);
+}
+
+.lang-arrow {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+.lang-dropdown-btn.open .lang-arrow {
+  transform: rotate(180deg);
+}
+
+.lang-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  z-index: 10;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.lang-option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background var(--transition-fast);
+  color: var(--text);
+}
+
+.lang-option:hover {
+  background: var(--bg);
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 12. МОДАЛЬНЫЕ ОКНА ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-md);
+  color: var(--text);
+  text-align: center;
+}
+
+.modal-input {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.modal-ok-btn,
+.modal-cancel-btn {
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.modal-ok-btn {
+  background: var(--primary);
+  color: var(--primary-text);
+  border: none;
+}
+
+.modal-ok-btn:hover,
+.modal-cancel-btn:hover {
+  background: var(--primary-hover);
+  color: var(--primary-text);
+}
+
+.modal-cancel-btn:hover {
+  background: var(--danger);
+  color: var(--danger-text);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== 13. ЦВЕТОВАЯ ПАЛИТРА В МОДАЛКЕ ===== */
+.modal-color-picker {
+  margin-top: 1rem;
+}
+
+.color-options {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  transition: all 0.15s ease;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+  border-color: var(--text);
+}
+
+.color-swatch.selected {
+  border-color: var(--text);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+/* Кружок "сброс на тему" */
+.color-swatch.color-default {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  position: relative;
+}
+
+.color-swatch.color-default::after {
+  content: "✕";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* ===== 14. ИНДИКАТОР ЗАГРУЗКИ ===== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 15. АНИМАЦИИ ===== */
+
+/* Задачи */
+.task-item {
+  animation: taskFadeIn 0.25s ease-out both;
+}
+
+@keyframes taskFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.task-item.removing {
+  animation: taskFadeOut 0.2s ease-in forwards;
+}
+
+@keyframes taskFadeOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(30px); }
+}
+
+.task-item.completed .task-text {
+  transition: opacity 0.2s ease, text-decoration 0.2s ease;
+}
+
+/* Папки */
+.folder-badge {
+  animation: folderFadeIn 0.25s ease-out both;
+}
+
+@keyframes folderFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.folder-badge.removing {
+  animation: folderFadeOut 0.2s ease-in forwards;
+}
+
+@keyframes folderFadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.8); }
+}
+
+/* ===== 16. DRAG & DROP (SORTABLE) ===== */
+.task-item.sortable-ghost,
+.folder-badge.sortable-ghost {
+  opacity: 0.4;
+  background: var(--border);
+}
+
+.task-item.sortable-drag,
+.folder-badge.sortable-drag {
+  cursor: grabbing;
+}
+
+/* ===== 17. АДАПТИВНАЯ ВЁРСТКА ===== */
+@media (max-width: 900px) {
+  .app-container {
+    padding: 1.5rem 1rem;
+  }
+  .header {
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+  }
+  .controls {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 0;
+  }
+  .app-container {
+    border-radius: 0;
+    padding: 1rem 0.8rem;
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  .header h1 {
+    font-size: 1.4rem;
+  }
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  button, select, input[type="text"], input[type="email"], input[type="password"] {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .auth-form {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .folder-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+    gap: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .folder-badge {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .add-folder-btn {
+    flex-shrink: 0;
+  }
+
+  .task-item {
+    padding: 0.7rem 0.2rem;
+    gap: 0.5rem;
+  }
+
+  .task-text {
+    font-size: 0.9rem;
+  }
+
+  .task-actions button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .task-form {
+    gap: 0.4rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .task-form input {
+    padding: 0.5rem 0.7rem;
+  }
+
+  .modal-box {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modal-buttons {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* ===== 18. ФУТЕР С ПОДПИСЬЮ (только на экране аутентификации) ===== */
+.app-footer {
+  text-align: center;
+  padding: 2.5rem 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-top: auto; 
+}
+
+.app-footer a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity var(--transition-micro);
+}
+
+.app-footer a:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
