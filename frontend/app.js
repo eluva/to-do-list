@@ -343,27 +343,25 @@ document.getElementById('signUpBtn').addEventListener('click', async () => {
 
 logoutBtn.addEventListener('click', logout);
 
-// ========== GOOGLE SIGN-IN (Firebase)==========
+// ========== GOOGLE SIGN-IN (Firebase) – адаптивный ==========
 const googleSignInBtn = document.getElementById('googleSignInBtn');
 
 if (googleSignInBtn) {
   googleSignInBtn.addEventListener('click', async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    // На мобильных устройствах и планшетах используем редирект, иначе попап
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (isMobile) {
-      // Редирект (работает во всех браузерах, не блокируется)
+      // На телефонах всегда редирект (попап часто блокируется)
       await firebaseAuth.signInWithRedirect(provider);
     } else {
-      // Десктоп – попап
+      // Десктоп: сначала пробуем попап, при неудаче – редирект
       try {
         const result = await firebaseAuth.signInWithPopup(provider);
         const idToken = await result.user.getIdToken();
         await handleGoogleToken(idToken);
       } catch (e) {
-        if (e.code === 'auth/popup-blocked') {
-          // Если попап заблокирован, пробуем редирект
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/cancelled-popup-request') {
           await firebaseAuth.signInWithRedirect(provider);
         } else {
           console.error(e);
@@ -374,6 +372,7 @@ if (googleSignInBtn) {
   });
 }
 
+// Обработчик возврата после редиректа (вызывается при загрузке страницы)
 async function handleGoogleRedirectResult() {
   try {
     const result = await firebaseAuth.getRedirectResult();
@@ -382,24 +381,32 @@ async function handleGoogleRedirectResult() {
       await handleGoogleToken(idToken);
     }
   } catch (e) {
-    console.error(e);
+    // Игнорируем ошибки (например, пользователь отменил вход)
+    console.warn('Redirect sign-in error:', e.message);
+  }
+}
+
+// Общая функция отправки токена на сервер
+async function handleGoogleToken(idToken) {
+  try {
+    const data = await apiCall('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ idToken })
+    });
+    token = data.token;
+    localStorage.setItem('token', token);
+    showApp();
+  } catch (e) {
     await showAlert('Google sign in failed: ' + e.message);
   }
 }
 
-async function handleGoogleToken(idToken) {
-  const data = await apiCall('/auth/google', {
-    method: 'POST',
-    body: JSON.stringify({ idToken })
+// Проверяем результат редиректа только если пользователь не авторизован
+if (!token) {
+  window.addEventListener('load', () => {
+    handleGoogleRedirectResult();
   });
-  token = data.token;
-  localStorage.setItem('token', token);
-  showApp();
 }
-
-window.addEventListener('load', () => {
-  handleGoogleRedirectResult();
-});
 
 // ========== 7. ПАПКИ ==========
 const folderListDiv = document.getElementById('folderList');
