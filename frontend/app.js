@@ -355,13 +355,18 @@ if (googleSignInBtn) {
       // На телефонах всегда редирект (попап часто блокируется)
       await firebaseAuth.signInWithRedirect(provider);
     } else {
-      // Десктоп: сначала пробуем попап, при неудаче – редирект
+      // Десктоп: сначала пробуем попап
       try {
         const result = await firebaseAuth.signInWithPopup(provider);
         const idToken = await result.user.getIdToken();
         await handleGoogleToken(idToken);
       } catch (e) {
-        if (e.code === 'auth/popup-blocked' || e.code === 'auth/cancelled-popup-request') {
+        // Если попап закрыт, заблокирован или любая другая ошибка – пробуем редирект
+        if (
+          e.code === 'auth/popup-blocked' ||
+          e.code === 'auth/cancelled-popup-request' ||
+          e.code === 'auth/popup-closed-by-user'
+        ) {
           await firebaseAuth.signInWithRedirect(provider);
         } else {
           console.error(e);
