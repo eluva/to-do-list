@@ -343,41 +343,17 @@ document.getElementById('signUpBtn').addEventListener('click', async () => {
 
 logoutBtn.addEventListener('click', logout);
 
-// ========== GOOGLE SIGN-IN (Firebase) – адаптивный ==========
+// ========== GOOGLE SIGN-IN (Firebase) – универсальный редирект ==========
 const googleSignInBtn = document.getElementById('googleSignInBtn');
 
 if (googleSignInBtn) {
   googleSignInBtn.addEventListener('click', async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    if (isMobile) {
-      // На телефонах всегда редирект (попап часто блокируется)
-      await firebaseAuth.signInWithRedirect(provider);
-    } else {
-      // Десктоп: сначала пробуем попап
-      try {
-        const result = await firebaseAuth.signInWithPopup(provider);
-        const idToken = await result.user.getIdToken();
-        await handleGoogleToken(idToken);
-      } catch (e) {
-        // Если попап закрыт, заблокирован или любая другая ошибка – пробуем редирект
-        if (
-          e.code === 'auth/popup-blocked' ||
-          e.code === 'auth/cancelled-popup-request' ||
-          e.code === 'auth/popup-closed-by-user'
-        ) {
-          await firebaseAuth.signInWithRedirect(provider);
-        } else {
-          console.error(e);
-          await showAlert('Google sign in failed: ' + e.message);
-        }
-      }
-    }
+    await firebaseAuth.signInWithRedirect(provider);
   });
 }
 
-// Обработчик возврата после редиректа (вызывается при загрузке страницы)
+// Обработчик возврата после редиректа
 async function handleGoogleRedirectResult() {
   try {
     const result = await firebaseAuth.getRedirectResult();
@@ -386,7 +362,6 @@ async function handleGoogleRedirectResult() {
       await handleGoogleToken(idToken);
     }
   } catch (e) {
-    // Игнорируем ошибки (например, пользователь отменил вход)
     console.warn('Redirect sign-in error:', e.message);
   }
 }
@@ -406,7 +381,7 @@ async function handleGoogleToken(idToken) {
   }
 }
 
-// Проверяем результат редиректа только если пользователь не авторизован
+// Проверяем результат редиректа при загрузке страницы, если нет токена
 if (!token) {
   window.addEventListener('load', () => {
     handleGoogleRedirectResult();
