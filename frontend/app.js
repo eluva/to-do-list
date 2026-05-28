@@ -29,7 +29,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const firebaseAuth = firebase.auth();
 
-const API_BASE = 'https://to-do-list-urp2.onrender.com/api';   // изменить при деплое
+const API_BASE = 'https://to-do-list-urp2.onrender.com/api';  
 
 // Глобальное состояние
 let token = localStorage.getItem('token');
@@ -343,24 +343,63 @@ document.getElementById('signUpBtn').addEventListener('click', async () => {
 
 logoutBtn.addEventListener('click', logout);
 
-// Google Firebase
+// ========== GOOGLE SIGN-IN (Firebase)==========
 const googleSignInBtn = document.getElementById('googleSignInBtn');
+
 if (googleSignInBtn) {
   googleSignInBtn.addEventListener('click', async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      const result = await firebaseAuth.signInWithPopup(provider);
-      const idToken = await result.user.getIdToken();
-      const data = await apiCall('/auth/google', { method:'POST', body: JSON.stringify({ idToken }) });
-      token = data.token;
-      localStorage.setItem('token', token);
-      showApp();
-    } catch(e) {
-      console.error(e);
-      await showAlert('Google sign in failed: ' + e.message);
+    // На мобильных устройствах и планшетах используем редирект, иначе попап
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // Редирект (работает во всех браузерах, не блокируется)
+      await firebaseAuth.signInWithRedirect(provider);
+    } else {
+      // Десктоп – попап
+      try {
+        const result = await firebaseAuth.signInWithPopup(provider);
+        const idToken = await result.user.getIdToken();
+        await handleGoogleToken(idToken);
+      } catch (e) {
+        if (e.code === 'auth/popup-blocked') {
+          // Если попап заблокирован, пробуем редирект
+          await firebaseAuth.signInWithRedirect(provider);
+        } else {
+          console.error(e);
+          await showAlert('Google sign in failed: ' + e.message);
+        }
+      }
     }
   });
 }
+
+async function handleGoogleRedirectResult() {
+  try {
+    const result = await firebaseAuth.getRedirectResult();
+    if (result.user) {
+      const idToken = await result.user.getIdToken();
+      await handleGoogleToken(idToken);
+    }
+  } catch (e) {
+    console.error(e);
+    await showAlert('Google sign in failed: ' + e.message);
+  }
+}
+
+async function handleGoogleToken(idToken) {
+  const data = await apiCall('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ idToken })
+  });
+  token = data.token;
+  localStorage.setItem('token', token);
+  showApp();
+}
+
+window.addEventListener('load', () => {
+  handleGoogleRedirectResult();
+});
 
 // ========== 7. ПАПКИ ==========
 const folderListDiv = document.getElementById('folderList');
